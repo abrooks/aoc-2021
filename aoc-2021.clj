@@ -1,16 +1,14 @@
 ;; gorilla-repl.fileformat = 1
 
 ;; **
-;;; # Gorilla REPL
+;;; # Advent of Code 2021
 ;;; 
-;;; Welcome to gorilla :-)
-;;; 
-;;; Shift + enter evaluates code. Hit alt+g twice in quick succession or click the menu icon (upper-right corner) for more commands ...
-;;; 
-;;; It's a good habit to run each worksheet in its own namespace: feel free to use the declaration we've provided below if you'd like.
+;;; Wherein we wrestle a Gorilla (repl) and try to make some code.
 ;; **
 
 ;; @@
-(ns scenic-reef
-  (:require [gorilla-plot.core :as plot]))
+(ns aoc-2021)
 ;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-nil'>nil</span>","value":"nil"}
+;; <=
