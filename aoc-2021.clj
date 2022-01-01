@@ -16,6 +16,18 @@
 ;; <=
 
 ;; **
+;;; Let's create a function to load example files:
+;; **
+
+;; @@
+(defn load-data [fname]
+  (s/split-lines (slurp fname)))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/load-data</span>","value":"#'aoc-2021/load-data"}
+;; <=
+
+;; **
 ;;; ## Day 1
 ;;; 
 ;;; 
@@ -43,6 +55,8 @@
 ;; <=
 
 ;; **
+;;; ### Part 1
+;;; 
 ;;; Create a function that grabs subsequent pairs, compares them, finds those that are true (where they are increasing) and counts them.
 ;; **
 
@@ -70,19 +84,7 @@
 ;; <=
 
 ;; **
-;;; Let's create a function to load example files:
-;; **
-
-;; @@
-(defn load-data [fname]
-  (s/split-lines (slurp fname)))
-;; @@
-;; =>
-;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/load-data</span>","value":"#'aoc-2021/load-data"}
-;; <=
-
-;; **
-;;; And run against today's data:
+;;; Now run against today's data:
 ;; **
 
 ;; @@
@@ -93,7 +95,9 @@
 ;; <=
 
 ;; **
-;;; Here's the part 2 function:
+;;; ### Part 2
+;;; 
+;;; Here's the part 2 function, building on part 1:
 ;; **
 
 ;; @@
@@ -127,4 +131,142 @@
 ;; @@
 ;; =>
 ;;; {"type":"html","content":"<span class='clj-unkown'>1789</span>","value":"1789"}
+;; <=
+
+;; **
+;;; ## Day 2
+;; **
+
+;; @@
+(def d2-ex
+  (s/split-lines
+"forward 5
+down 5
+forward 8
+up 3
+down 8
+forward 2"))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/d2-ex</span>","value":"#'aoc-2021/d2-ex"}
+;; <=
+
+;; @@
+(def direction {"forward"  [1  0]
+                 "up"      [0 -1]
+                 "down"    [0  1]})
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/direction</span>","value":"#'aoc-2021/direction"}
+;; <=
+
+;; @@
+(defn go [init [dir mag]]
+  (map +
+       init
+       (map #(* mag %) (direction dir))))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/go</span>","value":"#'aoc-2021/go"}
+;; <=
+
+;; **
+;;; Test it out a little:
+;; **
+
+;; @@
+(go [0 0] ["forward" 5])
+;; @@
+;; =>
+;;; {"type":"list-like","open":"<span class='clj-lazy-seq'>(</span>","close":"<span class='clj-lazy-seq'>)</span>","separator":" ","items":[{"type":"html","content":"<span class='clj-long'>5</span>","value":"5"},{"type":"html","content":"<span class='clj-long'>0</span>","value":"0"}],"value":"(5 0)"}
+;; <=
+
+;; @@
+(reduce go [0 0] [["forward" 4]["down" 3]["forward" 1] ["up" 1]])
+;; @@
+;; =>
+;;; {"type":"list-like","open":"<span class='clj-lazy-seq'>(</span>","close":"<span class='clj-lazy-seq'>)</span>","separator":" ","items":[{"type":"html","content":"<span class='clj-long'>5</span>","value":"5"},{"type":"html","content":"<span class='clj-long'>2</span>","value":"2"}],"value":"(5 2)"}
+;; <=
+
+;; @@
+(def d2-data (load-data "d2.txt"))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/d2-data</span>","value":"#'aoc-2021/d2-data"}
+;; <=
+
+;; @@
+(defn d2a-commands [data]
+  (map #(let [[dir mag] (s/split % #" ")]
+          [dir (Integer/parseInt mag)])
+       data))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/d2a-commands</span>","value":"#'aoc-2021/d2a-commands"}
+;; <=
+
+;; @@
+(defn d2a [cmds]
+  (reduce go [0 0] cmds))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/d2a</span>","value":"#'aoc-2021/d2a"}
+;; <=
+
+;; @@
+(->> d2-data
+  d2a-commands
+  d2a
+  (apply *))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-long'>1484118</span>","value":"1484118"}
+;; <=
+
+;; **
+;;; Because of the change in complexity, we'll adjust our approach, making the direction lookup map more complex and the go function simpler.
+;; **
+
+;; @@
+(def dir-aim
+  {"forward" (fn [[p d a] m]
+               [(+ p m), (+ d (* a m)), a])
+   "up"      (fn [[p d a] m]
+               [p, d, (- a m)])
+   "down"    (fn [[p d a] m]
+               [p, d, (+ a m)])})
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/dir-aim</span>","value":"#'aoc-2021/dir-aim"}
+;; <=
+
+;; @@
+(defn go-aim [state [dir mag]]
+  (let [dfn (dir-aim dir)]
+    (dfn state mag)))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-var'>#&#x27;aoc-2021/go-aim</span>","value":"#'aoc-2021/go-aim"}
+;; <=
+
+;; @@
+(->> d2-ex
+  d2a-commands
+  (reduce go-aim [0 0 0])
+  (take 2)
+  (apply *))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-long'>900</span>","value":"900"}
+;; <=
+
+;; @@
+(->> d2-data
+  d2a-commands
+  (reduce go-aim [0 0 0])
+  (take 2)
+  (apply *))
+;; @@
+;; =>
+;;; {"type":"html","content":"<span class='clj-long'>1463827010</span>","value":"1463827010"}
 ;; <=
